@@ -1,0 +1,32 @@
+query roundDetails($address: ID!, $skip: Int!) {
+  round(id: $address) {
+    id
+    roundMetaPtr {
+      pointer
+    }
+    program {
+      metaPtr {
+        pointer
+      }
+    }
+    votingStrategy {
+      votes(orderBy: createdAt, first: 1000, skip: $skip) {
+        projectId
+        from
+        id
+        amount
+        to
+        token
+      }
+    }
+    projects {
+      project
+      payoutAddress
+      metaPtr {
+        id
+        pointer
+        protocol
+      }
+    }
+  }
+}
