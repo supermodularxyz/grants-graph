@@ -10,7 +10,7 @@ import ContractsProvider from '../providers/ContractsProvider/ContractProvider'
 import { RoundDetailsQueryHookResult } from '../gql/types.generated';
 
 const mainnetSugraph = new HttpLink({
-  uri: "https://gateway.thegraph.com/api/86c0d7accfff88bb2e3da5503af4c2d7/subgraphs/id/BQXTJRLZi7NWGq5AXzQQxvYNa5i1HmqALEJwy3gGJHCr"
+  uri: "https://api.studio.thegraph.com/query/32278/allo-grants-graph/v0.0.3"
 })
 
 const goerliSubgraph = new HttpLink({
