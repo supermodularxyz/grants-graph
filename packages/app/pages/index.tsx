@@ -201,7 +201,7 @@ const Home: NextPage = () => {
             {/* <div className='flex flex-1 justify-end mt-2 italic text-sm'>
               Try with the <button className='ml-1 text-indigo-600 italic' onClick={exampleRound}>latest grant round</button>
             </div> */}
-            <div className='w-full mt-2 select-none'>
+            {/* <div className='w-full mt-2 select-none'>
               <div className={classNames('flex flex-1 italic text-sm mt-3', { "mb-1": showKnownRounds })}>
                 <span role="button" onClick={() => setShowKnownRounds(!showKnownRounds)}>Show known rounds</span>
               </div>
@@ -219,12 +219,8 @@ const Home: NextPage = () => {
                         <button className="block focus:outline-none">
                           <span className="absolute inset-0" aria-hidden="true" />
                           <p className="truncate text-sm font-medium text-gray-900">{round.title}</p>
-                          {/* <p className="truncate text-sm text-gray-500">{message.subject}</p> */}
                         </button>
                       </div>
-                      {/* <time dateTime={message.datetime} className="flex-shrink-0 whitespace-nowrap text-sm text-gray-500">
-                        {message.time}
-                      </time> */}
                     </div>
                     <div className="mt-1">
                       <p className="text-sm text-gray-600 line-clamp-2">{round.description}</p>
@@ -232,7 +228,7 @@ const Home: NextPage = () => {
                   </li>
                 ))}
               </ul>}
-            </div>
+            </div> */}
           </form>
         </Card>
 
