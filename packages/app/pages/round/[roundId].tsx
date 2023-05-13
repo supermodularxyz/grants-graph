@@ -35,29 +35,29 @@ const RoundPage: NextPage = () => {
     },
     onCompleted(data: any) {
       countRef.current += 1000
-      // if (roundAddress.length > 0) {
-      //   if ((data?.round?.votingStrategy?.votes?.length || 0) >= countRef.current) {
-      //     fetchMore({
-      //       variables: {
-      //         skip: countRef.current
-      //       }
-      //     })
-      //   } else {
-      //     setLoading(false)
-      //   }
-      // } else {
-      //   countRef.current = 0
-      // }
-
-      if (countRef.current <= 2000) {
-        fetchMore({
-          variables: {
-            skip: countRef.current
-          }
-        })
+      if (roundAddress.length > 0) {
+        if ((data?.round?.votingStrategy?.votes?.length || 0) >= countRef.current) {
+          fetchMore({
+            variables: {
+              skip: countRef.current
+            }
+          })
+        } else {
+          setLoading(false)
+        }
       } else {
-        setLoading(false)
+        countRef.current = 0
       }
+
+      // if (countRef.current <= 2000) {
+      //   fetchMore({
+      //     variables: {
+      //       skip: countRef.current
+      //     }
+      //   })
+      // } else {
+      //   setLoading(false)
+      // }
     }
   })
 
