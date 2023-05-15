@@ -4,9 +4,9 @@ import { useRouter } from 'next/router'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { BigNumber, ethers } from 'ethers';
 import { ArrowLeft, CornerDownRight, X } from 'react-feather'
-import { useRoundDetailsQuery } from '../../gql/types.generated';
+import { useRoundDetailsQuery, MetaPtr } from '../../gql/types.generated';
 import { Card } from "../../components"
-import { formatNumber, getTokenInfo, loadIPFSJSON } from '../../utils/web3';
+import { formatNumber, getTokenInfo, loadIPFSJSON, sortAddresses, TokenMap } from '../../utils/web3';
 import { NodeType, handleNodeClick, DonorNode } from '../../utils/pack';
 import { NodeSummary, ActiveNode, Stats, Meta } from '../../types';
 
@@ -31,15 +31,16 @@ const RoundPage: NextPage = () => {
     },
     variables: {
       address: roundAddress,
-      skip: 0
+      lastID: ""
     },
     onCompleted(data: any) {
       countRef.current += 1000
+
       if (roundAddress.length > 0) {
         if ((data?.round?.votingStrategy?.votes?.length || 0) >= countRef.current) {
           fetchMore({
             variables: {
-              skip: countRef.current
+              lastID: data.round.votingStrategy.votes[data.round.votingStrategy.votes.length - 1].id
             }
           })
         } else {
@@ -146,11 +147,35 @@ const RoundPage: NextPage = () => {
     setMeta({ roundMeta, programMeta, stats })
   }, [roundData?.round?.program.metaPtr.pointer, roundData?.round?.projects, roundData?.round?.roundMetaPtr.pointer, roundData?.round?.votingStrategy.votes])
 
+
+  const loadProjects = useCallback(async () => {
+    const nativeToken = "0x0000000000000000000000000000000000000000"
+
+    // get all tokens in donations and sort them
+    const tokensList = Array.from((roundData?.round?.votingStrategy.votes || []).reduce((acc: Set<string>, vote: { token: string }) => {
+      if (vote.token !== nativeToken && !acc.has(vote.token)) {
+        acc.add(vote.token);
+      }
+      return acc;
+    }, new Set([]))).sort(sortAddresses)
+
+    // get token information including symbol & decimal
+    const tokensMap = await getTokenInfo(tokensList, chainId);
+
+    const projectsMeta = (await Promise.all((roundData?.round?.projects || []).map((p: { metaPtr: MetaPtr }) => loadIPFSJSON(p.metaPtr.pointer || '')))).reduce((acc: any, curr: any, index: number) => {
+      acc[((roundData?.round?.projects as [])[index] as any)?.project] = curr
+      return acc;
+    }, {});
+
+    setProjectsData({ projectsMeta, tokensMap });
+  }, [roundData?.round?.projects, roundData?.round?.votingStrategy.votes])
+
   useEffect(() => {
     if (!loading) {
+      loadProjects()
       loadMetaPtr()
     }
-  }, [loading, loadMetaPtr])
+  }, [loading, loadProjects, loadMetaPtr])
 
 
   return (
@@ -199,7 +224,7 @@ const RoundPage: NextPage = () => {
                         <a href={`https://etherscan.io/address/${i.id}`} target="_blank" rel="noreferrer">{i.address}</a>
                       </div>
                     </div>
-                    <span onClick={() => {
+                    <span role="button" onClick={() => {
                       handleNodeClick("", { data: { name: i.id, type: NodeType.Donor, color: i.color } }, "")
                       openNode(i.id, i.color, i.highlightColor)
                     }}>
@@ -228,9 +253,7 @@ const RoundPage: NextPage = () => {
           </ul>
         </Card>}
       </aside>
-      {roundAddress.length > 0 && <GraphPage chainId={chainId} roundData={loading ? undefined : roundData} showLoading={loading} handleNode={handleNode} onProjectsMeta={(m) => {
-        setProjectsData(m)
-      }} />}
+      {roundAddress.length > 0 && <GraphPage chainId={chainId} roundData={loading ? undefined : roundData} showLoading={loading} handleNode={handleNode} projectsMeta={projectsData.projectsMeta} tokensMap={projectsData.tokensMap} />}
     </main>
   )
 }
