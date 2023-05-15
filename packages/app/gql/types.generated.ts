@@ -1834,7 +1834,7 @@ export enum SubgraphErrorPolicy {
 
 export type RoundDetailsQueryVariables = Exact<{
   address: Scalars['ID'];
-  skip: Scalars['Int'];
+  lastID?: InputMaybe<Scalars['ID']>;
 }>;
 
 
@@ -1871,7 +1871,7 @@ export type RoundDetailsQueryResult = (
 
 
 export const RoundDetailsDocument = /*#__PURE__*/ gql`
-    query roundDetails($address: ID!, $skip: Int!) {
+    query roundDetails($address: ID!, $lastID: ID) {
   round(id: $address) {
     id
     roundMetaPtr {
@@ -1883,7 +1883,7 @@ export const RoundDetailsDocument = /*#__PURE__*/ gql`
       }
     }
     votingStrategy {
-      votes(orderBy: createdAt, first: 1000, skip: $skip) {
+      votes(orderBy: id, first: 1000, where: {id_gt: $lastID}) {
         projectId
         from
         id
@@ -1892,7 +1892,7 @@ export const RoundDetailsDocument = /*#__PURE__*/ gql`
         token
       }
     }
-    projects {
+    projects(first: 1000) {
       project
       payoutAddress
       metaPtr {
@@ -1918,7 +1918,7 @@ export const RoundDetailsDocument = /*#__PURE__*/ gql`
  * const { data, loading, error } = useRoundDetailsQuery({
  *   variables: {
  *      address: // value for 'address'
- *      skip: // value for 'skip'
+ *      lastID: // value for 'lastID'
  *   },
  * });
  */

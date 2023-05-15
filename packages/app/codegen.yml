@@ -7,7 +7,7 @@ config:
   useTypeImports: true
 generates:
   gql/types.generated.ts:
-    schema: 'https://api.thegraph.com/subgraphs/name/ghostffcode/grants-manager'
+    schema: 'https://api.studio.thegraph.com/query/32278/allo-grants-graph/v0.0.3'
     documents: 'graphql/**/*.gql'
     plugins:
       typescript:
