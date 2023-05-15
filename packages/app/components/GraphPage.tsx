@@ -7,35 +7,20 @@ import { NodeType, OpenNode } from '../utils/pack';
 import { getTokenInfo, sortAddresses, loadIPFSJSON } from '../utils/web3';
 import { RoundDetailsQueryResult, MetaPtr } from '../gql/types.generated';
 
-const nativeToken = "0x0000000000000000000000000000000000000000"
+type Props = { chainId?: number, roundData?: RoundDetailsQueryResult, showLoading: boolean, handleNode: OpenNode, projectsMeta: any, tokensMap: any }
 
-type Props = { chainId?: number, roundData?: RoundDetailsQueryResult, showLoading: boolean, handleNode: OpenNode, onProjectsMeta: (i: {}) => void }
-
-const GraphPage: NextPage<Props> = ({ chainId = 1, roundData, showLoading, handleNode, onProjectsMeta }) => {
+const GraphPage: NextPage<Props> = ({ chainId = 1, roundData, showLoading, handleNode, projectsMeta, tokensMap }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const loadGraph = useCallback(async () => {
+
+    if (!projectsMeta) {
+      return null
+    }
+
     const exisitingNodes: Record<string, NodeItem> = {}
 
     exisitingNodes["0x0000000000000000000000000000000000000000000000000000000000000000"] = { name: "0x0000000000000000000000000000000000000000000000000000000000000000", type: NodeType.Project, shortKey: "0x000...0000", children: [] };
-
-    // get all tokens in donations and sort them
-    const tokensList = Array.from((roundData?.round?.votingStrategy.votes || []).reduce((acc: Set<string>, vote: { token: string }) => {
-      if (vote.token !== nativeToken && !acc.has(vote.token)) {
-        acc.add(vote.token);
-      }
-      return acc;
-    }, new Set([]))).sort(sortAddresses)
-
-    // get token information including symbol & decimal
-    const tokensMap = await getTokenInfo(tokensList, chainId);
-
-    const projectsMeta = (await Promise.all((roundData?.round?.projects || []).map((p: { metaPtr: MetaPtr }) => loadIPFSJSON(p.metaPtr.pointer || '')))).reduce((acc: any, curr: any, index: number) => {
-      acc[((roundData?.round?.projects as [])[index] as any)?.project] = curr
-      return acc;
-    }, {});
-
-    onProjectsMeta({ projectsMeta, tokensMap });
 
     // projects node
     (roundData?.round?.projects || []).forEach((project: { project: string }, i: number) => {
@@ -49,7 +34,7 @@ const GraphPage: NextPage<Props> = ({ chainId = 1, roundData, showLoading, handl
       const donationTokenInfo = tokensMap[vote.token];
 
       if (!projectsMeta[vote.projectId]) {
-        console.log("Error projectId")
+        console.log("Error projectId", vote.projectId)
         return null
       }
 
@@ -76,7 +61,7 @@ const GraphPage: NextPage<Props> = ({ chainId = 1, roundData, showLoading, handl
       canvasRef.current.appendChild(graph)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainId, handleNode, roundData?.round?.projects, roundData?.round?.votingStrategy.votes]);
+  }, [chainId, handleNode, projectsMeta, tokensMap, roundData?.round?.projects, roundData?.round?.votingStrategy.votes]);
 
   useEffect(() => {
     if (roundData) {
