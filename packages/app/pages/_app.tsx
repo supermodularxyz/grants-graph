@@ -8,6 +8,7 @@ import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { ApolloClient, ApolloLink, ApolloProvider, HttpLink, InMemoryCache } from '@apollo/client'
 import ContractsProvider from '../providers/ContractsProvider/ContractProvider'
 import { RoundDetailsQueryHookResult } from '../gql/types.generated';
+import Footer from '../components/Footer';
 
 const mainnetSugraph = new HttpLink({
   uri: "https://api.studio.thegraph.com/query/32278/allo-grants-graph/v0.0.3"
@@ -48,6 +49,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <RainbowKitProvider chains={chains}>
         <ContractsProvider>
           <Component {...pageProps} />
+          <Footer />
         </ContractsProvider>
       </RainbowKitProvider>
     </WagmiConfig>

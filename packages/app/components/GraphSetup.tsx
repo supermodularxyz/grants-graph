@@ -27,8 +27,7 @@ const Home = ({ roundAddress }: { roundAddress: `0x${string}` }) => {
       clientName: String(chainId)
     },
     variables: {
-      address: roundAddress,
-      skip: 0
+      address: roundAddress
     },
     onCompleted(data: any) {
       countRef.current += 1000
