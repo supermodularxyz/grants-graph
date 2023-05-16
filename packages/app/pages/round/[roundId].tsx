@@ -26,9 +26,6 @@ const RoundPage: NextPage = () => {
   const [activeDonors, setActiveDonors] = useState<Record<string, ActiveNode>>({})
   const [updateNode, setUpdateNode] = useState<{ id: string, type: NodeType, color: string, highlightColor: string }>()
   const [projectsData, setProjectsData] = useState<Record<string, any>>({})
-
-  console.log({ roundAddress, chainId })
-
   const { data: roundData, fetchMore } = useRoundDetailsQuery({
     context: {
       clientName: String(chainId)
@@ -143,13 +140,14 @@ const RoundPage: NextPage = () => {
     stats.push({ name: "Unique Voters", count: uniqueVoters.size });
 
     const tokenInfo = (await getTokenInfo(Object.keys(tokenVotes).filter((i) => i !== "0x0000000000000000000000000000000000000000"), chainId))
+
     for (const key in tokenInfo) {
       const i = tokenInfo[key];
       stats.push({ name: `${i.symbol} donation(s)`, count: formatNumber(tokenVotes[i.address], i.decimal) })
     }
 
     setMeta({ roundMeta, programMeta, stats })
-  }, [roundData?.round?.program.metaPtr.pointer, roundData?.round?.projects, roundData?.round?.roundMetaPtr.pointer, roundData?.round?.votingStrategy.votes])
+  }, [chainId, roundData?.round?.program.metaPtr.pointer, roundData?.round?.projects, roundData?.round?.roundMetaPtr.pointer, roundData?.round?.votingStrategy.votes])
 
 
   const loadProjects = useCallback(async () => {
@@ -172,7 +170,7 @@ const RoundPage: NextPage = () => {
     }, {});
 
     setProjectsData({ projectsMeta, tokensMap });
-  }, [roundData?.round?.projects, roundData?.round?.votingStrategy.votes])
+  }, [chainId, roundData?.round?.projects, roundData?.round?.votingStrategy.votes])
 
   useEffect(() => {
     if (!loading) {
