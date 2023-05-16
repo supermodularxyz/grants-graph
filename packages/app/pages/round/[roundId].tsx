@@ -16,15 +16,19 @@ const GraphPage = dynamic(() => import('../../components/GraphPage'), {
 
 const RoundPage: NextPage = () => {
   const countRef = useRef(0)
-  const chainId = 1;
   const router = useRouter()
-  const roundAddress = (router.query.roundId as string || "").toLowerCase()
-  const [showKnownRounds, setShowKnownRounds] = useState<boolean>(false)
+  const chainWithRound = (router.query.roundId as string || "").toLowerCase().split(":")
+  const roundAddress = (chainWithRound.length === 1 ? chainWithRound[0] : chainWithRound[1]) as string
+  const chainId = Number(chainWithRound.length === 1 ? 1 : chainWithRound[0])
+  // const [showKnownRounds, setShowKnownRounds] = useState<boolean>(false)
   const [meta, setMeta] = useState<Meta>()
   const [loading, setLoading] = useState<boolean>(true)
   const [activeDonors, setActiveDonors] = useState<Record<string, ActiveNode>>({})
   const [updateNode, setUpdateNode] = useState<{ id: string, type: NodeType, color: string, highlightColor: string }>()
   const [projectsData, setProjectsData] = useState<Record<string, any>>({})
+
+  console.log({ roundAddress, chainId })
+
   const { data: roundData, fetchMore } = useRoundDetailsQuery({
     context: {
       clientName: String(chainId)

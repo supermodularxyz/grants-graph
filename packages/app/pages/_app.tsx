@@ -7,7 +7,6 @@ import { wagmiClient, chains } from '../utils/wagmi';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { ApolloClient, ApolloLink, ApolloProvider, HttpLink, InMemoryCache } from '@apollo/client'
 import ContractsProvider from '../providers/ContractsProvider/ContractProvider'
-import { RoundDetailsQueryHookResult } from '../gql/types.generated';
 import Footer from '../components/Footer';
 
 const mainnetSugraph = new HttpLink({
@@ -20,6 +19,10 @@ const goerliSubgraph = new HttpLink({
 
 const fantomSubgraph = new HttpLink({
   uri: "https://api.thegraph.com/subgraphs/name/gitcoinco/grants-round-fantom-mainnet"
+})
+
+const optimismSubgraph = new HttpLink({
+  uri: "https://api.thegraph.com/subgraphs/name/ghostffcode/sm-op-allo"
 })
 
 const cache = new InMemoryCache({
@@ -38,7 +41,7 @@ const cache = new InMemoryCache({
 })
 
 const client = new ApolloClient({
-  link: ApolloLink.split((operation) => operation.getContext().clientName === '5', goerliSubgraph, ApolloLink.split((operation) => operation.getContext().clientName === '1', mainnetSugraph, fantomSubgraph)),
+  link: ApolloLink.split((operation) => operation.getContext().clientName === '5', goerliSubgraph, ApolloLink.split((operation) => operation.getContext().clientName === '1', mainnetSugraph, ApolloLink.split((operation) => operation.getContext().clientName === '10', optimismSubgraph, fantomSubgraph))),
   cache,
   connectToDevTools: true
 })
