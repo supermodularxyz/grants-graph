@@ -3,12 +3,14 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { BigNumber, ethers } from 'ethers';
+import { chains } from '../../utils/wagmi'
 import { ArrowLeft, CornerDownRight, X } from 'react-feather'
 import { useRoundDetailsQuery, MetaPtr } from '../../gql/types.generated';
 import { Card } from "../../components"
 import { formatNumber, getTokenInfo, loadIPFSJSON, sortAddresses, TokenMap } from '../../utils/web3';
 import { NodeType, handleNodeClick, DonorNode } from '../../utils/pack';
 import { NodeSummary, ActiveNode, Stats, Meta } from '../../types';
+import { useNetwork } from 'wagmi';
 
 const GraphPage = dynamic(() => import('../../components/GraphPage'), {
   ssr: false
@@ -62,6 +64,8 @@ const RoundPage: NextPage = () => {
       // }
     }
   })
+
+  const activeChain = chains.filter((c) => c.id === chainId)[0]
 
   const openNode = useCallback((nodeId: string, color: string, highlightColor: string) => {
     const donors = { ...activeDonors };
@@ -139,11 +143,11 @@ const RoundPage: NextPage = () => {
     stats.push({ name: "Votes", count: (roundData?.round?.votingStrategy.votes || []).length })
     stats.push({ name: "Unique Voters", count: uniqueVoters.size });
 
-    const tokenInfo = (await getTokenInfo(Object.keys(tokenVotes).filter((i) => i !== "0x0000000000000000000000000000000000000000"), chainId))
+    const tokenInfo = (await getTokenInfo(Object.keys(tokenVotes).filter((i) => i !== ethers.constants.AddressZero), chainId))
 
     for (const key in tokenInfo) {
       const i = tokenInfo[key];
-      stats.push({ name: `${i.symbol} donation(s)`, count: formatNumber(tokenVotes[i.address], i.decimal) })
+      stats.push({ name: `${i.symbol} donation(s)`, count: formatNumber(tokenVotes[i.address] || BigNumber.from('0'), i.decimal) })
     }
 
     setMeta({ roundMeta, programMeta, stats })
@@ -151,7 +155,7 @@ const RoundPage: NextPage = () => {
 
 
   const loadProjects = useCallback(async () => {
-    const nativeToken = "0x0000000000000000000000000000000000000000"
+    const nativeToken = ethers.constants.AddressZero
 
     // get all tokens in donations and sort them
     const tokensList = Array.from((roundData?.round?.votingStrategy.votes || []).reduce((acc: Set<string>, vote: { token: string }) => {
@@ -223,7 +227,7 @@ const RoundPage: NextPage = () => {
                     <div className='font-semibold flex flex-1 items-center'>
                       <div className='w-3 h-3 rounded-full mr-2' style={{ backgroundColor: i.highlightColor }} />
                       <div>
-                        <a href={`https://etherscan.io/address/${i.id}`} target="_blank" rel="noreferrer">{i.address}</a>
+                        <a href={`${activeChain.blockExplorers?.etherscan?.url}/address/${i.id}`} target="_blank" rel="noreferrer">{i.address}</a>
                       </div>
                     </div>
                     <span role="button" onClick={() => {

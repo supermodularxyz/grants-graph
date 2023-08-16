@@ -38,7 +38,12 @@ const GraphPage: NextPage<Props> = ({ chainId = 1, roundData, showLoading, handl
         return null
       }
 
-      const donorNode: DonorNode = { name: vote.from, shortKey: `${vote.from.substring(0, 6)}...${vote.from.substring(vote.from.length - 4)}`, type: NodeType.Donor, color: colors[donationTokenInfo.group], size: Number(ethers.utils.formatUnits(vote.amount, donationTokenInfo.decimal || "finney")) }
+      let amount = vote.amount
+      if (vote.token === ethers.constants.AddressZero) {
+        amount = String(Number(amount) * 1800)
+      }
+
+      const donorNode: DonorNode = { name: vote.from, shortKey: `${vote.from.substring(0, 6)}...${vote.from.substring(vote.from.length - 4)}`, type: NodeType.Donor, color: colors[donationTokenInfo.group], size: Number(ethers.utils.formatUnits(amount, donationTokenInfo.decimal || "finney")) }
 
       if (exisitingNodes[vote.projectId]) {
         exisitingNodes[vote.projectId].children.push(donorNode)

@@ -75,3 +75,4 @@ next-env.d.ts
 
 # doc directory
 /doc
+.history
